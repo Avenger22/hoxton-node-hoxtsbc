@@ -15,10 +15,8 @@ const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] })
 
 // #region 'Helper functions'
 function createToken (id: number) {
-
   // @ts-ignore
-  return jwt.sign({ id: id }, process.env.MY_SECRET, { expiresIn: '30s' })
-
+  return jwt.sign({ id: id }, process.env.MY_SECRET, { expiresIn: '60s' })
 }
 
 async function getUserFromToken (token: string) {
@@ -28,7 +26,6 @@ async function getUserFromToken (token: string) {
   
   // @ts-ignore
   const user = await prisma.user.findUnique({ where: { id: decodedData.id } })
-  
   return user
 
 }
