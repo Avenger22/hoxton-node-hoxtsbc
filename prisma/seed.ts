@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error']
@@ -11,7 +12,7 @@ const users = [
     lastName: "Number1",
     userName: "personNumber1",
     email: 'person1@email.com',
-    password: "12345",
+    password: bcrypt.hashSync("jurgen12345", 8),
     amount: 55.65
   },
   {
@@ -20,7 +21,7 @@ const users = [
     lastName: "Number2",
     userName: "personNumber2",
     email: 'person2@email.com',
-    password: "12345",
+    password: bcrypt.hashSync("bajan12345", 8),
     amount: 25.65
   },
   {
@@ -29,7 +30,7 @@ const users = [
     lastName: "Number3",
     userName: "personNumber3",
     email: 'person3@email.com',
-    password: "12345",
+    password: bcrypt.hashSync("jurgen123456", 8),
     amount: 15.65
   }
 ]
@@ -64,26 +65,26 @@ const transactions = [
 const photos = [
   {
     id: 1,
-    imageUrl: "eieiojejioe",
-    title: "cat",
+    imageUrl: "https://www.destinationmansfield.com/wp-content/uploads/2021/05/soccer-ball.jpg",
+    title: "soccer",
     userId: 1,
   },
   {
     id: 2,
-    imageUrl: "eieiojejioeee",
-    title: "cating",
+    imageUrl: "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=1.00xw:0.669xh;0,0.190xh&resize=980:*",
+    title: "dog",
     userId: 1
   },
   {
     id: 3,
-    imageUrl: "eieiojejioeee",
+    imageUrl: "https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png",
     title: "cat",
     userId: 3
   },
   {
     id: 4,
-    imageUrl: "fefefeffefe",
-    title: "catoppofjpojff",
+    imageUrl: "https://m.media-amazon.com/images/I/81bBIDU8BVL._AC_UX522_.jpg",
+    title: "baseball hat",
     userId: 3  
   }
 ]
