@@ -16,7 +16,7 @@ const prisma = new PrismaClient({ log: ['query', 'info', 'warn', 'error'] })
 // #region 'Helper functions'
 function createToken (id: number) {
   // @ts-ignore
-  return jwt.sign({ id: id }, process.env.MY_SECRET, { expiresIn: '60s' })
+  return jwt.sign({ id: id }, process.env.MY_SECRET, { expiresIn: '5h' })
 }
 
 async function getUserFromToken (token: string) {
@@ -32,7 +32,7 @@ async function getUserFromToken (token: string) {
 // #endregion
 
 // #region 'Auth End Points'
-app.post('/sign-in', async (req, res) => {
+app.post('/login', async (req, res) => {
 
   const { email, password } = req.body
 
@@ -59,11 +59,12 @@ app.post('/sign-in', async (req, res) => {
 
 })
 
-app.post('/validate', async (req, res) => {
+app.get('/validate', async (req, res) => {
 
-  const { token } = req.body
+  const token = req.headers.authorization
 
   try {
+    // @ts-ignore
     const user = await getUserFromToken(token)
     res.send(user)
   } 
@@ -82,7 +83,7 @@ app.post('/validate', async (req, res) => {
 app.get('/users', async (req, res) => {
 
   try {
-    const users = await prisma.user.findMany({ include: { transactions: true } })
+    const users = await prisma.user.findMany({ include: { transactions: true, photos: true } })
     res.send(users)
   }
 
@@ -101,7 +102,7 @@ app.get('/users/:id', async (req, res) => {
 
     const user = await prisma.user.findFirst({
       where: { id: idParam },
-      include: { transactions: true }
+      include: { transactions: true, photos: true }
     })
 
     if (user) {
@@ -363,6 +364,144 @@ app.patch('/transactions/:id', async (req, res) => {
   
   catch(error) {
     res.status(404).send({message: error})
+  }
+
+})
+// #endregion
+
+// #region 'photos endpoints'
+app.get('/photos', async (req, res) => {
+
+  try {
+    const photos = await prisma.photo.findMany({ include: { user: true } })
+    res.send(photos)
+  }
+
+  catch(error) {
+    //@ts-ignore
+    res.status(400).send(`<pre>${error.message}</pre>`)
+  }
+
+})
+
+app.get('/photos/:id', async (req, res) => {
+
+  const token = req.headers.authorization
+
+  try {
+
+    // @ts-ignore
+    const user = await getUserFromToken(token)
+    // @ts-ignore
+    const photos = await prisma.photo.findMany({ where: { userId: user.id }, inlcude: { user: true } })
+    res.send(photos)
+
+  } 
+  
+  catch (err) {
+    // @ts-ignore
+    res.status(400).send({ error: err.message })
+  }
+
+  // signed in ??? if they have a valid token, yes!
+  // if the token is valid, we know they are signed in
+  // and who they are
+
+})
+
+app.delete('/photos/:id', async (req, res) => {
+
+  const token = req.headers.authorization || ''
+  const id = Number(req.params.id)
+
+  try {
+
+    // check that they are signed in
+    const user = await getUserFromToken(token)
+
+    // check if the picture belongs to them
+    const photo = await prisma.photo.findUnique({ where: { id } })
+
+    if (photo?.userId === user?.id) {
+      // if it does: delete it
+      await prisma.photo.delete({ where: { id } })
+      res.send({ message: 'Photo successfully deleted.' })
+    } 
+    
+    else {
+      // if it does not: tell them they are not authorised
+      res
+        .status(401)
+        .send({ error: 'You are not authorised to do delete this photo.' })
+    }
+
+  } 
+  
+  catch (err) {
+    // @ts-ignore
+    res.status(400).send({ error: err.message })
+  }
+
+})
+
+app.post('/photos', async (req, res) => {
+
+  const token = req.headers.authorization || ''
+  const { imageUrl, title } = req.body
+
+  try {
+
+    const user = await getUserFromToken(token)
+
+    const photo = await prisma.photo.create({
+      data: {
+        imageUrl,
+        title,
+        // @ts-ignore
+        userId: user.id
+      }
+    })
+
+    res.send(photo)
+
+  } 
+  
+  catch (err) {
+    // @ts-ignore
+    res.status(400).send({ error: err.message })
+  }
+
+})
+
+app.patch('/photos/:id', async (req, res) => {
+
+  const idParam = Number(req.params.id)
+  const token = req.headers.authorization || ''
+  const { imageUrl, title } = req.body
+
+  try {
+
+    const user = await getUserFromToken(token)
+
+    const photo = await prisma.photo.update({
+      where: {
+        id: idParam
+      },
+      data: {
+        imageUrl,
+        title,
+        // @ts-ignore
+        userId: user.id
+      }
+    })
+
+    res.send(photo)
+
+  } 
+  
+  catch (err) {
+    // @ts-ignore
+    res.status(400).send({ error: err.message })
   }
 
 })
