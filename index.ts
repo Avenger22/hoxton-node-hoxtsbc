@@ -38,7 +38,7 @@ app.post('/login', async (req, res) => {
 
   try {
 
-    const user = await prisma.user.findUnique({ where: { email: email } })
+    const user = await prisma.user.findUnique({ where: { email: email }, include: { transactions: true, photos: true } })
     
     // @ts-ignore
     const passwordMatches = bcrypt.compareSync(password, user.password)
@@ -124,7 +124,7 @@ app.get('/users/:id', async (req, res) => {
 
 app.post('/users', async (req, res) => {
     
-  const { firstName, lastName, userName, email, password, amount } = req.body
+  const { firstName, lastName, fullName, email, password, amountInAccount } = req.body
 
   try {
 
@@ -134,10 +134,10 @@ app.post('/users', async (req, res) => {
     const newUser = {
       firstName: firstName,
       lastName: lastName,
-      userName: userName, 
+      fullName: fullName, 
       email: email,
       password: hashedPassword,
-      amount: amount
+      amountInAccount: amountInAccount
     }
 
     const userCheck = await prisma.user.findFirst({ where: { email: newUser.email } })
@@ -207,15 +207,15 @@ app.delete('/users/:id', async (req, res) => {
 app.patch('/users/:id', async (req, res) => {
 
   const idParam = req.params.id;
-  const { firstName, lastName, userName, email, password, amount } = req.body
+  const { firstName, lastName, fullName, email, password, amountInAccount } = req.body
 
   const userData = {
     firstName: firstName,
     lastName: lastName,
-    userName: userName, 
+    fullName: fullName, 
     email: email,
     password: password,
-    amount: amount
+    amountInAccount: amountInAccount
   }
 
   try {
@@ -283,11 +283,16 @@ app.get('/transactions/:id', async (req, res) => {
 
 app.post('/transactions', async (req, res) => {
     
-  const { amountUsed, dateCreated, userId } = req.body
+  const { amount, dateCreated, currency,
+  receiverOrSender, completedAt, isPositive, userId } = req.body
   
   const newTransaction = {
-    amountUsed: amountUsed,
+    amountUsed: amount,
     dateCreated: dateCreated, 
+    currency: currency,
+    receiverOrSender: receiverOrSender,
+    completedAt: completedAt,
+    isPositive: isPositive,
     userId: userId
   }
 
@@ -341,11 +346,16 @@ app.delete('/transactions/:id', async (req, res) => {
 app.patch('/transactions/:id', async (req, res) => {
 
   const idParam = req.params.id;
-  const { amountUsed, dateCreated, userId } = req.body
+  const { amount, dateCreated, currency,
+    receiverOrSender, completedAt, isPositive, userId } = req.body
 
   const newTransaction = {
-    amountUsed: amountUsed,
+    amountUsed: amount,
     dateCreated: dateCreated, 
+    currency: currency,
+    receiverOrSender: receiverOrSender,
+    completedAt: completedAt,
+    isPositive: isPositive,
     userId: userId
   }
 

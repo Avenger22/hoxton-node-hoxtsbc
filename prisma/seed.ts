@@ -10,55 +10,71 @@ const users = [
     id: 1,
     firstName: "Person",
     lastName: "Number1",
-    userName: "personNumber1",
+    fullName: "personNumber1",
     email: 'person1@email.com',
     password: bcrypt.hashSync("jurgen12345", 8),
-    amount: 55.65
+    amountInAccount: 55.65
   },
   {
     id: 2,
     firstName: "Person",
     lastName: "Number2",
-    userName: "personNumber2",
+    fullName: "personNumber2",
     email: 'person2@email.com',
     password: bcrypt.hashSync("bajan12345", 8),
-    amount: 25.65
+    amountInAccount: 25.65
   },
   {
     id: 3,
     firstName: "Person",
     lastName: "Number3",
-    userName: "personNumber3",
+    fullName: "personNumber3",
     email: 'person3@email.com',
     password: bcrypt.hashSync("jurgen123456", 8),
-    amount: 15.65
+    amountInAccount: 15.65
   }
 ]
 
 const transactions = [
   {
     id: 1,
-    amountUsed: 16.5,
+    amount: 16.5,
     dateCreated: "2020-03-19T14:21:00+02:00",
-    userId: 1,
-  },
-  {
-    id: 2,
-    amountUsed: 27.5,
-    dateCreated: "2022-01-12T14:21:00+02:00",
+    currency: "euro",
+    receiverOrSender: "eren1",
+    completedAt: "may 2021",
+    isPositive: true,
     userId: 1
   },
   {
-    id: 3,
-    amountUsed: 29.5,
-    dateCreated: "2017-01-19T14:21:00+02:00",
+    id: 2,
+    amount: 27.5,
+    dateCreated: "2022-01-12T14:21:00+02:00",
+    currency: "dollar",
+    receiverOrSender: "eren2",
+    completedAt: "may 2022",
+    isPositive: false,
     userId: 3
   },
   {
+    id: 3,
+    amount: 29.5,
+    dateCreated: "2017-01-19T14:21:00+02:00",
+    currency: "euro",
+    receiverOrSender: "eren3",
+    completedAt: "may 2024",
+    isPositive: true,
+    userId: 1
+  },
+  {
     id: 4,
-    amountUsed: 5.35,    
+    amount: 5.35,    
     dateCreated: "2021-03-19T14:21:00+02:00",
-    userId: 3  
+    currency: "euro",
+    receiverOrSender: "eren4",
+    completedAt: "june 2021",
+    isPositive: true,
+    userId: 2 
   }
 ]
 
@@ -92,8 +108,8 @@ const photos = [
 async function createStuff () {
 
   await prisma.transaction.deleteMany()
-  await prisma.user.deleteMany()
   await prisma.photo.deleteMany()
+  await prisma.user.deleteMany()
 
   for (const user of users) {
     await prisma.user.create({ data: user })
